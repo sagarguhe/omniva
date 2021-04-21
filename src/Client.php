@@ -215,6 +215,34 @@ class Client
             new SoapVar($writer->outputMemory(), XSD_ANYXML)
         );
     }
+    
+    /**
+     * @param array $trackingNumbers
+     * @return stdClass
+     */
+    public function getLabels($trackingNumbers = []): stdClass
+    {
+        if (empty($trackingNumbers)) {
+            throw new \InvalidArgumentException('Must have atleast one tracking number');
+        }
+
+        $writer = new XMLWriter();
+        $writer->openMemory();
+
+        $writer->startElement('ns1:addrcardMsgRequest');
+        $writer->writeElement('partner', $this->username);
+        $writer->writeElement('sendAddressCardTo', 'response');
+        $writer->startElement('barcodes');
+        foreach ($trackingNumbers as $trackingNumber) {
+            $writer->writeElement('barcode', $trackingNumber);
+        }
+        $writer->endElement();
+        $writer->endElement();
+
+        return $this->getSoapClient()->addrcardMsg(
+            new SoapVar($writer->outputMemory(), XSD_ANYXML)
+        );
+    }
 
     public function getSoapCLient(): SoapClient
     {
